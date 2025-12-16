@@ -7,6 +7,8 @@ const StudentDashboard = () => {
   const student = { name: "Demo Student" };
 
   const [scanStarted, setScanStarted] = useState(false);
+  const [faceVerified, setFaceVerified] = useState(false);
+  const [verifiedRoll, setVerifiedRoll] = useState(null);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
 
   useEffect(() => {
@@ -16,21 +18,25 @@ const StudentDashboard = () => {
     );
   }, []);
 
-  const handleFaceDetected = (success, matchedRoll) => {
-    if (!success || !matchedRoll) return;
+  const handleVerified = (roll) => {
+    setFaceVerified(true);
+    setVerifiedRoll(roll);
+  };
 
-    // 🔑 UNMOUNT FIRST
-    setScanStarted(false);
+  const markAttendance = () => {
+    if (!faceVerified || !verifiedRoll) return;
 
     addAttendance({
       name: student.name,
-      roll: matchedRoll,
+      roll: verifiedRoll,
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       status: "Present",
     });
 
     setAttendanceMarked(true);
+    setScanStarted(false);
+    setFaceVerified(false);
   };
 
   return (
@@ -39,18 +45,32 @@ const StudentDashboard = () => {
 
       <div className="card section">
         {!attendanceMarked ? (
-          <button
-            className="attendance-btn"
-            onClick={() => setScanStarted(true)}
-          >
-            Mark Attendance
-          </button>
+          <>
+            {!scanStarted && (
+              <button
+                className="attendance-btn"
+                onClick={() => setScanStarted(true)}
+              >
+                Scan Face
+              </button>
+            )}
+
+            {scanStarted && (
+              <FaceScanner onVerified={handleVerified} />
+            )}
+
+            {faceVerified && (
+              <button
+                className="attendance-btn"
+                style={{ marginTop: 10 }}
+                onClick={markAttendance}
+              >
+                Mark Attendance
+              </button>
+            )}
+          </>
         ) : (
           <p className="safe">✔ Attendance marked for today</p>
-        )}
-
-        {scanStarted && (
-          <FaceScanner onFaceDetected={handleFaceDetected} />
         )}
       </div>
     </div>
