@@ -7,45 +7,55 @@ import {
   getEngagementLevel,
   getBadges,
 } from "../utils/gamification";
+import {
+  getOverallAttendance,
+  getSubjectWiseAttendance,
+  getAttendanceInsights,
+} from "../utils/analytics";
 
 const StudentDashboard = () => {
+  const student = { name: "Demo Student", roll: "CS23" };
+
   const [scanStarted, setScanStarted] = useState(false);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Gamification states
+  // Gamification
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [level, setLevel] = useState("");
   const [badges, setBadges] = useState([]);
 
-  // Demo student data
-  const student = {
-    name: "Demo Student",
-    roll: "CS23",
-  };
+  // Analytics
+  const [overall, setOverall] = useState({ present: 0, total: 0, percentage: 0 });
+  const [subjects, setSubjects] = useState({});
+  const [insights, setInsights] = useState([]);
 
   useEffect(() => {
-    refreshGamification();
+    refreshAll();
     checkTodayAttendance();
   }, []);
 
-  const refreshGamification = () => {
+  const refreshAll = () => {
     const s = calculateAttendanceScore();
     const st = calculateStreak();
+
     setScore(s);
     setStreak(st);
     setLevel(getEngagementLevel(s));
     setBadges(getBadges(s, st));
+
+    setOverall(getOverallAttendance());
+    setSubjects(getSubjectWiseAttendance());
+    setInsights(getAttendanceInsights());
   };
 
   const checkTodayAttendance = () => {
     const today = new Date().toLocaleDateString();
     const records = getAttendance();
-    const marked = records.some(
-      (r) => r.date === today && r.roll === student.roll
+    setAttendanceMarked(
+      records.some((r) => r.date === today && r.roll === student.roll)
     );
-    setAttendanceMarked(marked);
   };
 
   const handleFaceDetected = (success) => {
@@ -55,95 +65,92 @@ const StudentDashboard = () => {
       return;
     }
 
-    const record = {
+    addAttendance({
       name: student.name,
       roll: student.roll,
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       status: "Present",
-    };
+    });
 
-    addAttendance(record);
     setMessage("✅ Attendance marked successfully!");
     setAttendanceMarked(true);
     setScanStarted(false);
-    refreshGamification();
+    refreshAll();
   };
 
   return (
     <div style={{ padding: "20px" }}>
       <h2>Student Dashboard</h2>
 
-      {/* GAMIFICATION PANEL */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "15px",
-          marginBottom: "20px",
-        }}
-      >
-        <div className="card">
-          <h4>🎯 Attendance Score</h4>
-          <h2>{score} / 100</h2>
-        </div>
-
-        <div className="card">
-          <h4>🔥 Attendance Streak</h4>
-          <h2>{streak} Days</h2>
-        </div>
-
-        <div className="card">
-          <h4>⭐ Engagement Level</h4>
-          <h2>{level}</h2>
-        </div>
+      {/* GAMIFICATION */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))", gap: "15px" }}>
+        <div className="card"><h4>🎯 Score</h4><h2>{score}/100</h2></div>
+        <div className="card"><h4>🔥 Streak</h4><h2>{streak} Days</h2></div>
+        <div className="card"><h4>⭐ Level</h4><h2>{level}</h2></div>
       </div>
 
       {/* BADGES */}
-      <div className="card" style={{ marginBottom: "20px" }}>
+      <div className="card" style={{ marginTop: "15px" }}>
         <h4>🏅 Achievements</h4>
-        {badges.length === 0 ? (
-          <p>No badges earned yet</p>
-        ) : (
-          <ul>
-            {badges.map((b, i) => (
-              <li key={i}>{b}</li>
-            ))}
-          </ul>
-        )}
+        {badges.length ? <ul>{badges.map((b, i) => <li key={i}>{b}</li>)}</ul> : <p>No badges yet</p>}
       </div>
 
-      {/* STUDENT INFO */}
-      <div className="card">
-        <p>
-          Name: <b>{student.name}</b>
-        </p>
-        <p>
-          Roll No: <b>{student.roll}</b>
-        </p>
+      {/* OVERALL ATTENDANCE */}
+      <div className="card" style={{ marginTop: "15px" }}>
+        <h4>📊 Overall Attendance</h4>
+        <p>{overall.present} / {overall.total} classes attended</p>
+        <div style={{ background: "#ddd", borderRadius: "10px", overflow: "hidden" }}>
+          <div
+            style={{
+              width: `${overall.percentage}%`,
+              background: overall.percentage >= 75 ? "#28a745" : "#dc3545",
+              color: "white",
+              padding: "5px",
+              textAlign: "center",
+            }}
+          >
+            {overall.percentage}%
+          </div>
+        </div>
+      </div>
+
+      {/* SUBJECT-WISE */}
+      <div className="card" style={{ marginTop: "15px" }}>
+        <h4>📚 Subject-wise Attendance</h4>
+        {Object.keys(subjects).map((sub) => (
+          <p key={sub}>
+            <b>{sub}</b>: {subjects[sub].percentage}% —
+            <span style={{
+              color:
+                subjects[sub].status === "Safe"
+                  ? "green"
+                  : subjects[sub].status === "Warning"
+                  ? "orange"
+                  : "red",
+            }}>
+              {" "}{subjects[sub].status}
+            </span>
+          </p>
+        ))}
+      </div>
+
+      {/* INSIGHTS */}
+      <div className="card" style={{ marginTop: "15px" }}>
+        <h4>💡 Smart Insights</h4>
+        <ul>
+          {insights.map((i, idx) => <li key={idx}>{i}</li>)}
+        </ul>
       </div>
 
       {/* ATTENDANCE ACTION */}
       <div className="card" style={{ marginTop: "15px" }}>
         {!attendanceMarked && (
-          <button onClick={() => setScanStarted(true)}>
-            Mark Attendance
-          </button>
+          <button onClick={() => setScanStarted(true)}>Mark Attendance</button>
         )}
-
-        {scanStarted && (
-          <FaceScanner onFaceDetected={handleFaceDetected} />
-        )}
-
-        {attendanceMarked && (
-          <p style={{ color: "green", marginTop: "10px" }}>
-            Attendance already marked for today.
-          </p>
-        )}
-
-        {message && (
-          <p style={{ marginTop: "10px" }}>{message}</p>
-        )}
+        {scanStarted && <FaceScanner onFaceDetected={handleFaceDetected} />}
+        {attendanceMarked && <p style={{ color: "green" }}>Attendance marked for today.</p>}
+        {message && <p>{message}</p>}
       </div>
     </div>
   );
