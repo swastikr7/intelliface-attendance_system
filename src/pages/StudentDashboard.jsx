@@ -12,6 +12,7 @@ import {
   getSubjectWiseAttendance,
   getAttendanceInsights,
 } from "../utils/analytics";
+import { getWeeklyGoal } from "../utils/goals";
 import "../styles/dashboard.css";
 
 const StudentDashboard = () => {
@@ -20,14 +21,24 @@ const StudentDashboard = () => {
   const [scanStarted, setScanStarted] = useState(false);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
 
+  // Gamification
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [level, setLevel] = useState("");
   const [badges, setBadges] = useState([]);
 
+  // Analytics
   const [overall, setOverall] = useState({ present: 0, total: 0, percentage: 0 });
   const [subjects, setSubjects] = useState({});
   const [insights, setInsights] = useState([]);
+
+  // Weekly goal
+  const [weeklyGoal, setWeeklyGoal] = useState({
+    target: 5,
+    completed: 0,
+    remaining: 0,
+    percentage: 0,
+  });
 
   useEffect(() => {
     refreshAll();
@@ -46,6 +57,8 @@ const StudentDashboard = () => {
     setOverall(getOverallAttendance());
     setSubjects(getSubjectWiseAttendance());
     setInsights(getAttendanceInsights());
+
+    setWeeklyGoal(getWeeklyGoal(5));
   };
 
   const checkTodayAttendance = () => {
@@ -93,6 +106,30 @@ const StudentDashboard = () => {
         </div>
       </div>
 
+      {/* WEEKLY GOAL */}
+      <div className="card section">
+        <h4>🎯 Weekly Attendance Goal</h4>
+        <p>
+          {weeklyGoal.completed} / {weeklyGoal.target} classes attended
+        </p>
+        <div className="progress-container">
+          <div
+            className="progress-bar"
+            style={{
+              width: `${weeklyGoal.percentage}%`,
+              background: weeklyGoal.percentage >= 100 ? "#4caf50" : "#2196f3",
+            }}
+          >
+            {weeklyGoal.percentage}%
+          </div>
+        </div>
+        <p style={{ marginTop: "8px" }}>
+          {weeklyGoal.remaining === 0
+            ? "🎉 Weekly goal achieved! Great consistency."
+            : `🚀 Attend ${weeklyGoal.remaining} more classes to reach your goal.`}
+        </p>
+      </div>
+
       {/* OVERALL ATTENDANCE */}
       <div className="card section">
         <h4>📊 Overall Attendance</h4>
@@ -127,7 +164,9 @@ const StudentDashboard = () => {
         <div className="card">
           <h4>🏅 Achievements</h4>
           <ul className="badges">
-            {badges.length ? badges.map((b, i) => <li key={i}>{b}</li>) : <li>No badges yet</li>}
+            {badges.length
+              ? badges.map((b, i) => <li key={i}>{b}</li>)
+              : <li>No badges yet</li>}
           </ul>
         </div>
       </div>
@@ -160,4 +199,3 @@ const StudentDashboard = () => {
 };
 
 export default StudentDashboard;
-
