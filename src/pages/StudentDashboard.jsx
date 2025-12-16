@@ -12,21 +12,19 @@ import {
   getSubjectWiseAttendance,
   getAttendanceInsights,
 } from "../utils/analytics";
+import "../styles/dashboard.css";
 
 const StudentDashboard = () => {
   const student = { name: "Demo Student", roll: "CS23" };
 
   const [scanStarted, setScanStarted] = useState(false);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
-  const [message, setMessage] = useState("");
 
-  // Gamification
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [level, setLevel] = useState("");
   const [badges, setBadges] = useState([]);
 
-  // Analytics
   const [overall, setOverall] = useState({ present: 0, total: 0, percentage: 0 });
   const [subjects, setSubjects] = useState({});
   const [insights, setInsights] = useState([]);
@@ -52,18 +50,15 @@ const StudentDashboard = () => {
 
   const checkTodayAttendance = () => {
     const today = new Date().toLocaleDateString();
-    const records = getAttendance();
     setAttendanceMarked(
-      records.some((r) => r.date === today && r.roll === student.roll)
+      getAttendance().some(
+        (r) => r.date === today && r.roll === student.roll
+      )
     );
   };
 
   const handleFaceDetected = (success) => {
-    if (!success) {
-      setMessage("❌ Face not detected. Try again.");
-      setScanStarted(false);
-      return;
-    }
+    if (!success) return;
 
     addAttendance({
       name: student.name,
@@ -73,41 +68,41 @@ const StudentDashboard = () => {
       status: "Present",
     });
 
-    setMessage("✅ Attendance marked successfully!");
     setAttendanceMarked(true);
     setScanStarted(false);
     refreshAll();
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="dashboard">
       <h2>Student Dashboard</h2>
 
-      {/* GAMIFICATION */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))", gap: "15px" }}>
-        <div className="card"><h4>🎯 Score</h4><h2>{score}/100</h2></div>
-        <div className="card"><h4>🔥 Streak</h4><h2>{streak} Days</h2></div>
-        <div className="card"><h4>⭐ Level</h4><h2>{level}</h2></div>
-      </div>
-
-      {/* BADGES */}
-      <div className="card" style={{ marginTop: "15px" }}>
-        <h4>🏅 Achievements</h4>
-        {badges.length ? <ul>{badges.map((b, i) => <li key={i}>{b}</li>)}</ul> : <p>No badges yet</p>}
+      {/* TOP STATS */}
+      <div className="grid-3 section">
+        <div className="card">
+          <h4>🎯 Score</h4>
+          <div className="stat">{score}/100</div>
+        </div>
+        <div className="card">
+          <h4>🔥 Streak</h4>
+          <div className="stat">{streak} Days</div>
+        </div>
+        <div className="card">
+          <h4>⭐ Level</h4>
+          <div className="stat">{level}</div>
+        </div>
       </div>
 
       {/* OVERALL ATTENDANCE */}
-      <div className="card" style={{ marginTop: "15px" }}>
+      <div className="card section">
         <h4>📊 Overall Attendance</h4>
         <p>{overall.present} / {overall.total} classes attended</p>
-        <div style={{ background: "#ddd", borderRadius: "10px", overflow: "hidden" }}>
+        <div className="progress-container">
           <div
+            className="progress-bar"
             style={{
               width: `${overall.percentage}%`,
-              background: overall.percentage >= 75 ? "#28a745" : "#dc3545",
-              color: "white",
-              padding: "5px",
-              textAlign: "center",
+              background: overall.percentage >= 75 ? "#4caf50" : "#f44336",
             }}
           >
             {overall.percentage}%
@@ -115,45 +110,54 @@ const StudentDashboard = () => {
         </div>
       </div>
 
-      {/* SUBJECT-WISE */}
-      <div className="card" style={{ marginTop: "15px" }}>
-        <h4>📚 Subject-wise Attendance</h4>
-        {Object.keys(subjects).map((sub) => (
-          <p key={sub}>
-            <b>{sub}</b>: {subjects[sub].percentage}% —
-            <span style={{
-              color:
-                subjects[sub].status === "Safe"
-                  ? "green"
-                  : subjects[sub].status === "Warning"
-                  ? "orange"
-                  : "red",
-            }}>
-              {" "}{subjects[sub].status}
-            </span>
-          </p>
-        ))}
+      {/* SUBJECTS + BADGES */}
+      <div className="grid-2 section">
+        <div className="card">
+          <h4>📚 Subject-wise Attendance</h4>
+          {Object.keys(subjects).map((s) => (
+            <div key={s} className="subject">
+              <span>{s}</span>
+              <span className={subjects[s].status.toLowerCase()}>
+                {subjects[s].percentage}% ({subjects[s].status})
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="card">
+          <h4>🏅 Achievements</h4>
+          <ul className="badges">
+            {badges.length ? badges.map((b, i) => <li key={i}>{b}</li>) : <li>No badges yet</li>}
+          </ul>
+        </div>
       </div>
 
       {/* INSIGHTS */}
-      <div className="card" style={{ marginTop: "15px" }}>
+      <div className="card section">
         <h4>💡 Smart Insights</h4>
-        <ul>
+        <ul className="insights">
           {insights.map((i, idx) => <li key={idx}>{i}</li>)}
         </ul>
       </div>
 
       {/* ATTENDANCE ACTION */}
-      <div className="card" style={{ marginTop: "15px" }}>
-        {!attendanceMarked && (
-          <button onClick={() => setScanStarted(true)}>Mark Attendance</button>
+      <div className="card section">
+        {!attendanceMarked ? (
+          <button
+            className="attendance-btn"
+            onClick={() => setScanStarted(true)}
+          >
+            Mark Attendance
+          </button>
+        ) : (
+          <p className="safe">✔ Attendance marked for today</p>
         )}
+
         {scanStarted && <FaceScanner onFaceDetected={handleFaceDetected} />}
-        {attendanceMarked && <p style={{ color: "green" }}>Attendance marked for today.</p>}
-        {message && <p>{message}</p>}
       </div>
     </div>
   );
 };
 
 export default StudentDashboard;
+
