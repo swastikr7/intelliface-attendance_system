@@ -1,70 +1,90 @@
 import React, { useEffect, useRef, useState } from "react";
+import * as faceapi from "face-api.js";
+import { loadFaceModels } from "../utils/faceModels";
+import { getEnrolledStudents } from "../utils/enrollment";
+import { matchFace } from "../utils/faceMatcher";
 
 const FaceScanner = ({ onFaceDetected }) => {
   const videoRef = useRef(null);
   const [error, setError] = useState("");
-  const [scanning, setScanning] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let stream;
 
     const startCamera = async () => {
       try {
+        await loadFaceModels();
+
         stream = await navigator.mediaDevices.getUserMedia({
           video: true,
         });
 
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-
-        // Simulate face detection after camera starts
-        setTimeout(() => {
-          setScanning(false);
-          onFaceDetected(true);
-        }, 3000);
+        videoRef.current.srcObject = stream;
+        setLoading(false);
       } catch (err) {
         console.error(err);
-        setError("Camera access denied or not available");
+        setError("Camera or model loading failed");
       }
     };
 
     startCamera();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
+      if (stream) stream.getTracks().forEach((t) => t.stop());
     };
-  }, [onFaceDetected]);
+  }, []);
 
-  if (error) {
-    return (
-      <div style={{ color: "red", marginTop: "10px" }}>
-        ❌ {error}
-      </div>
+  const scanFace = async () => {
+    if (!videoRef.current) return;
+
+    const detection = await faceapi
+      .detectSingleFace(
+        videoRef.current,
+        new faceapi.TinyFaceDetectorOptions()
+      )
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (!detection) {
+      setError("No face detected. Try again.");
+      return;
+    }
+
+    const enrolled = getEnrolledStudents();
+
+    const matchedRoll = matchFace(
+      Array.from(detection.descriptor),
+      enrolled
     );
-  }
+
+    if (!matchedRoll) {
+      setError("Face not recognized. Attendance denied.");
+      return;
+    }
+
+    // SUCCESS
+    onFaceDetected(true, matchedRoll);
+  };
 
   return (
-    <div style={{ marginTop: "20px" }}>
+    <div>
+      {loading && <p>Loading camera & models…</p>}
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
       <video
         ref={videoRef}
         autoPlay
-        playsInline
         muted
-        width="300"
-        style={{
-          borderRadius: "10px",
-          border: "2px solid #00bcd4",
-        }}
+        playsInline
+        width="260"
+        style={{ borderRadius: "10px", marginTop: "10px" }}
       />
 
-      {scanning && (
-        <p style={{ marginTop: "10px" }}>
-          📷 Scanning face… Please look at the camera
-        </p>
-      )}
+      <button onClick={scanFace} style={{ marginTop: "10px" }}>
+        Scan Face
+      </button>
     </div>
   );
 };
