@@ -4,13 +4,13 @@ import { loadFaceModels } from "../utils/faceModels";
 import { getEnrolledStudents } from "../utils/enrollment";
 import { matchFace } from "../utils/faceMatcher";
 
-const FaceScanner = ({ onFaceDetected }) => {
+const FaceScanner = ({ onVerified }) => {
   const videoRef = useRef(null);
-  const mountedRef = useRef(true); // 🔑 critical
   const streamRef = useRef(null);
+  const mountedRef = useRef(true);
 
   const [ready, setReady] = useState(false);
-  const [scanned, setScanned] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -25,24 +25,14 @@ const FaceScanner = ({ onFaceDetected }) => {
         if (!mountedRef.current) return;
 
         streamRef.current = stream;
-
         if (!videoRef.current) return;
+
         videoRef.current.srcObject = stream;
 
         videoRef.current.onloadedmetadata = async () => {
           if (!mountedRef.current || !videoRef.current) return;
-
           await videoRef.current.play();
-
-          videoRef.current.width = 320;
-          videoRef.current.height = 240;
-
           setReady(true);
-          console.log(
-            "🎥 Video ready:",
-            videoRef.current.videoWidth,
-            videoRef.current.videoHeight
-          );
         };
       } catch (err) {
         if (mountedRef.current) {
@@ -56,7 +46,6 @@ const FaceScanner = ({ onFaceDetected }) => {
 
     return () => {
       mountedRef.current = false;
-
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
@@ -65,15 +54,9 @@ const FaceScanner = ({ onFaceDetected }) => {
   }, []);
 
   const scanFace = async () => {
-    if (scanned || !mountedRef.current) return;
-    setScanned(true);
-    setError("");
+    if (!ready || verified || !mountedRef.current) return;
 
-    if (!ready || !videoRef.current) {
-      setError("Camera not ready yet.");
-      setScanned(false);
-      return;
-    }
+    setError("");
 
     const detections = await faceapi
       .detectAllFaces(
@@ -88,22 +71,14 @@ const FaceScanner = ({ onFaceDetected }) => {
 
     if (!mountedRef.current) return;
 
-    if (!detections || detections.length === 0) {
-      setError("No face detected.");
-      setScanned(false);
-      return;
-    }
-
-    if (detections.length > 1) {
-      setError("Multiple faces detected.");
-      setScanned(false);
+    if (!detections || detections.length !== 1) {
+      setError("Ensure exactly one face is visible.");
       return;
     }
 
     const enrolled = getEnrolledStudents();
-    if (enrolled.length === 0) {
+    if (!enrolled.length) {
       setError("No enrolled students found.");
-      setScanned(false);
       return;
     }
 
@@ -112,13 +87,13 @@ const FaceScanner = ({ onFaceDetected }) => {
 
     if (!matchedRoll) {
       setError("Face not recognized.");
-      setScanned(false);
       return;
     }
 
-    if (mountedRef.current) {
-      console.log("✅ Face matched:", matchedRoll);
-      onFaceDetected(true, matchedRoll);
+    setVerified(true);
+
+    if (typeof onVerified === "function") {
+      onVerified(matchedRoll);
     }
   };
 
@@ -132,9 +107,15 @@ const FaceScanner = ({ onFaceDetected }) => {
         style={{ width: 320, height: 240, borderRadius: 10 }}
       />
 
-      <button onClick={scanFace} style={{ marginTop: 10 }}>
-        Scan Face
-      </button>
+      {!verified ? (
+        <button onClick={scanFace} style={{ marginTop: 10 }}>
+          Scan Face
+        </button>
+      ) : (
+        <p style={{ color: "lightgreen", marginTop: 10 }}>
+          ✅ Face verified
+        </p>
+      )}
 
       {!ready && <p>Initializing camera…</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
