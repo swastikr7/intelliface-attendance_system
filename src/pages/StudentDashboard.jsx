@@ -50,13 +50,10 @@ const StudentDashboard = () => {
   }, []);
 
   const refreshAll = () => {
-    const s = calculateAttendanceScore();
-    const st = calculateStreak();
-
-    setScore(s);
-    setStreak(st);
-    setLevel(getEngagementLevel(s));
-    setBadges(getBadges(s, st));
+    setScore(calculateAttendanceScore());
+    setStreak(calculateStreak());
+    setLevel(getEngagementLevel(calculateAttendanceScore()));
+    setBadges(getBadges(calculateAttendanceScore(), calculateStreak()));
 
     setOverall(getOverallAttendance());
     setSubjects(getSubjectWiseAttendance());
@@ -73,23 +70,23 @@ const StudentDashboard = () => {
   };
 
   /**
-   * Called from FaceScanner after live face recognition
-   * @param {boolean} success
-   * @param {string} matchedRoll
+   * Called ONCE after successful face match
    */
   const handleFaceDetected = (success, matchedRoll) => {
     if (!success || !matchedRoll) return;
 
+    // 🔑 UNMOUNT SCANNER FIRST (CRITICAL)
+    setScanStarted(false);
+
     addAttendance({
       name: student.name,
-      roll: matchedRoll, // ✅ matched enrolled student
+      roll: matchedRoll,
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       status: "Present",
     });
 
     setAttendanceMarked(true);
-    setScanStarted(false);
     refreshAll();
   };
 
@@ -123,21 +120,11 @@ const StudentDashboard = () => {
         <div className="progress-container">
           <div
             className="progress-bar"
-            style={{
-              width: `${weeklyGoal.percentage}%`,
-              background:
-                weeklyGoal.percentage >= 100 ? "#4caf50" : "#2196f3",
-            }}
+            style={{ width: `${weeklyGoal.percentage}%` }}
           >
             {weeklyGoal.percentage}%
           </div>
         </div>
-
-        <p className="goal-message">
-          {weeklyGoal.remaining === 0
-            ? "🎉 Weekly goal achieved! Great consistency."
-            : `🚀 Attend ${weeklyGoal.remaining} more classes to reach your goal.`}
-        </p>
       </div>
 
       {/* OVERALL ATTENDANCE */}
@@ -149,47 +136,17 @@ const StudentDashboard = () => {
         <div className="progress-container">
           <div
             className="progress-bar"
-            style={{
-              width: `${overall.percentage}%`,
-              background:
-                overall.percentage >= 75 ? "#4caf50" : "#f44336",
-            }}
+            style={{ width: `${overall.percentage}%` }}
           >
             {overall.percentage}%
           </div>
         </div>
       </div>
 
-      {/* SUBJECTS + BADGES */}
-      <div className="grid-2 section">
-        <div className="card">
-          <h4>📚 Subject-wise Attendance</h4>
-          {Object.keys(subjects).map((s) => (
-            <div key={s} className="subject">
-              <span>{s}</span>
-              <span className={subjects[s].status.toLowerCase()}>
-                {subjects[s].percentage}% ({subjects[s].status})
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="card">
-          <h4>🏅 Achievements</h4>
-          <ul className="badges">
-            {badges.length ? (
-              badges.map((b, i) => <li key={i}>{b}</li>)
-            ) : (
-              <li>No badges yet</li>
-            )}
-          </ul>
-        </div>
-      </div>
-
       {/* INSIGHTS */}
       <div className="card section">
         <h4>💡 Smart Insights</h4>
-        <ul className="insights">
+        <ul>
           {insights.map((i, idx) => (
             <li key={idx}>{i}</li>
           ))}
