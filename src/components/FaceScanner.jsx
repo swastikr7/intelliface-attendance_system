@@ -7,25 +7,34 @@ import { matchFace } from "../utils/faceMatcher";
 const FaceScanner = ({ onFaceDetected }) => {
   const videoRef = useRef(null);
   const [error, setError] = useState("");
-  const [modelsReady, setModelsReady] = useState(false);
-  const [cameraReady, setCameraReady] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let stream;
 
     const init = async () => {
       try {
-        console.log("🔄 Loading face models...");
         await loadFaceModels();
-        setModelsReady(true);
 
         stream = await navigator.mediaDevices.getUserMedia({ video: true });
         videoRef.current.srcObject = stream;
 
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
-          setCameraReady(true);
-          console.log("📷 Camera ready");
+        videoRef.current.onloadedmetadata = async () => {
+          await videoRef.current.play();
+
+          // 🔑 FORCE dimensions (CRITICAL)
+          videoRef.current.width = 320;
+          videoRef.current.height = 240;
+
+          // wait one frame
+          setTimeout(() => {
+            setReady(true);
+            console.log(
+              "🎥 Video ready:",
+              videoRef.current.videoWidth,
+              videoRef.current.videoHeight
+            );
+          }, 300);
         };
       } catch (err) {
         console.error(err);
@@ -43,32 +52,42 @@ const FaceScanner = ({ onFaceDetected }) => {
   const scanFace = async () => {
     setError("");
 
-    if (!modelsReady || !cameraReady) {
-      setError("Models or camera not ready yet. Please wait.");
+    if (!ready) {
+      setError("Camera not ready yet. Please wait.");
       return;
     }
 
     const video = videoRef.current;
 
-    console.log("🔍 Scanning face...");
+    console.log(
+      "🔍 Scanning with dimensions:",
+      video.videoWidth,
+      video.videoHeight
+    );
 
-    const detection = await faceapi
-      .detectSingleFace(
+    // ✅ SAFER: detectAllFaces
+    const detections = await faceapi
+      .detectAllFaces(
         video,
         new faceapi.TinyFaceDetectorOptions({
-          inputSize: 416, // safer
+          inputSize: 416,
           scoreThreshold: 0.5,
         })
       )
       .withFaceLandmarks()
-      .withFaceDescriptor();
+      .withFaceDescriptors();
 
-    if (!detection) {
-      setError("No face detected. Ensure good lighting and face visibility.");
+    if (!detections || detections.length === 0) {
+      setError("No face detected. Improve lighting and face visibility.");
       return;
     }
 
-    console.log("✅ Face detected");
+    if (detections.length > 1) {
+      setError("Multiple faces detected. Only one face allowed.");
+      return;
+    }
+
+    const liveDescriptor = Array.from(detections[0].descriptor);
 
     const enrolled = getEnrolledStudents();
     if (enrolled.length === 0) {
@@ -76,18 +95,14 @@ const FaceScanner = ({ onFaceDetected }) => {
       return;
     }
 
-    const matchedRoll = matchFace(
-      Array.from(detection.descriptor),
-      enrolled
-    );
+    const matchedRoll = matchFace(liveDescriptor, enrolled);
 
     if (!matchedRoll) {
       setError("Face not recognized. Attendance denied.");
       return;
     }
 
-    console.log("🎯 Face matched:", matchedRoll);
-
+    console.log("✅ Face matched:", matchedRoll);
     onFaceDetected(true, matchedRoll);
   };
 
@@ -98,21 +113,19 @@ const FaceScanner = ({ onFaceDetected }) => {
         autoPlay
         muted
         playsInline
-        width="280"
-        height="210"
-        style={{ borderRadius: "10px", marginTop: "10px" }}
+        style={{
+          width: "320px",
+          height: "240px",
+          borderRadius: "10px",
+          marginTop: "10px",
+        }}
       />
 
-      <button
-        onClick={scanFace}
-        disabled={!modelsReady || !cameraReady}
-        style={{ marginTop: "10px" }}
-      >
+      <button onClick={scanFace} style={{ marginTop: "10px" }}>
         Scan Face
       </button>
 
-      {!modelsReady && <p>Loading face models…</p>}
-      {!cameraReady && <p>Starting camera…</p>}
+      {!ready && <p>Initializing camera…</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
