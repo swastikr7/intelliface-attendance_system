@@ -1,5 +1,3 @@
-// src/utils/enrollment.js
-
 const STORAGE_KEY = "intelliface_enrolled_students";
 
 export function getEnrolledStudents() {
@@ -21,8 +19,10 @@ export function enrollStudent(student) {
   const updated = [
     ...existing,
     {
-      ...student,
       id: Date.now(),
+      name: student.name,
+      roll: student.roll,
+      faceDescriptor: student.faceDescriptor, // 👈 REAL IDENTITY
       enrolledAt: new Date().toLocaleString(),
     },
   ];
