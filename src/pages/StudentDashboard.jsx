@@ -28,7 +28,11 @@ const StudentDashboard = () => {
   const [badges, setBadges] = useState([]);
 
   // Analytics
-  const [overall, setOverall] = useState({ present: 0, total: 0, percentage: 0 });
+  const [overall, setOverall] = useState({
+    present: 0,
+    total: 0,
+    percentage: 0,
+  });
   const [subjects, setSubjects] = useState({});
   const [insights, setInsights] = useState([]);
 
@@ -112,18 +116,22 @@ const StudentDashboard = () => {
         <p>
           {weeklyGoal.completed} / {weeklyGoal.target} classes attended
         </p>
+
         <div className="progress-container">
           <div
             className="progress-bar"
             style={{
               width: `${weeklyGoal.percentage}%`,
-              background: weeklyGoal.percentage >= 100 ? "#4caf50" : "#2196f3",
+              background:
+                weeklyGoal.percentage >= 100 ? "#4caf50" : "#2196f3",
             }}
           >
             {weeklyGoal.percentage}%
           </div>
         </div>
-        <p style={{ marginTop: "8px" }}>
+
+        {/* ✅ FIXED MOTIVATION MESSAGE */}
+        <p className="goal-message">
           {weeklyGoal.remaining === 0
             ? "🎉 Weekly goal achieved! Great consistency."
             : `🚀 Attend ${weeklyGoal.remaining} more classes to reach your goal.`}
@@ -133,13 +141,16 @@ const StudentDashboard = () => {
       {/* OVERALL ATTENDANCE */}
       <div className="card section">
         <h4>📊 Overall Attendance</h4>
-        <p>{overall.present} / {overall.total} classes attended</p>
+        <p>
+          {overall.present} / {overall.total} classes attended
+        </p>
         <div className="progress-container">
           <div
             className="progress-bar"
             style={{
               width: `${overall.percentage}%`,
-              background: overall.percentage >= 75 ? "#4caf50" : "#f44336",
+              background:
+                overall.percentage >= 75 ? "#4caf50" : "#f44336",
             }}
           >
             {overall.percentage}%
@@ -164,9 +175,11 @@ const StudentDashboard = () => {
         <div className="card">
           <h4>🏅 Achievements</h4>
           <ul className="badges">
-            {badges.length
-              ? badges.map((b, i) => <li key={i}>{b}</li>)
-              : <li>No badges yet</li>}
+            {badges.length ? (
+              badges.map((b, i) => <li key={i}>{b}</li>)
+            ) : (
+              <li>No badges yet</li>
+            )}
           </ul>
         </div>
       </div>
@@ -175,7 +188,9 @@ const StudentDashboard = () => {
       <div className="card section">
         <h4>💡 Smart Insights</h4>
         <ul className="insights">
-          {insights.map((i, idx) => <li key={idx}>{i}</li>)}
+          {insights.map((i, idx) => (
+            <li key={idx}>{i}</li>
+          ))}
         </ul>
       </div>
 
@@ -192,7 +207,9 @@ const StudentDashboard = () => {
           <p className="safe">✔ Attendance marked for today</p>
         )}
 
-        {scanStarted && <FaceScanner onFaceDetected={handleFaceDetected} />}
+        {scanStarted && (
+          <FaceScanner onFaceDetected={handleFaceDetected} />
+        )}
       </div>
     </div>
   );
