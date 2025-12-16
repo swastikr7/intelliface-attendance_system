@@ -16,7 +16,7 @@ import { getWeeklyGoal } from "../utils/goals";
 import "../styles/dashboard.css";
 
 const StudentDashboard = () => {
-  const student = { name: "Demo Student", roll: "CS23" };
+  const student = { name: "Demo Student" };
 
   const [scanStarted, setScanStarted] = useState(false);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
@@ -68,18 +68,21 @@ const StudentDashboard = () => {
   const checkTodayAttendance = () => {
     const today = new Date().toLocaleDateString();
     setAttendanceMarked(
-      getAttendance().some(
-        (r) => r.date === today && r.roll === student.roll
-      )
+      getAttendance().some((r) => r.date === today)
     );
   };
 
-  const handleFaceDetected = (success) => {
-    if (!success) return;
+  /**
+   * Called from FaceScanner after live face recognition
+   * @param {boolean} success
+   * @param {string} matchedRoll
+   */
+  const handleFaceDetected = (success, matchedRoll) => {
+    if (!success || !matchedRoll) return;
 
     addAttendance({
       name: student.name,
-      roll: student.roll,
+      roll: matchedRoll, // ✅ matched enrolled student
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       status: "Present",
@@ -130,7 +133,6 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        {/* ✅ FIXED MOTIVATION MESSAGE */}
         <p className="goal-message">
           {weeklyGoal.remaining === 0
             ? "🎉 Weekly goal achieved! Great consistency."
