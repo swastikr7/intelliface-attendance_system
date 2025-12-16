@@ -101,3 +101,11 @@
   background: #777;
   cursor: not-allowed;
 }
+
+/* Weekly goal motivation message */
+.goal-message {
+  margin-top: 10px;
+  font-weight: 600;
+  color: #eaeaf0;
+}
+
