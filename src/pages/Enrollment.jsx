@@ -16,9 +16,9 @@ const Enrollment = () => {
     setStudents(getEnrolledStudents());
   }, []);
 
-  const handleEnroll = () => {
+  const handleSaveEnrollment = () => {
     if (!name || !roll || !faceDescriptor) {
-      setMessage("❌ Name, roll number, and face capture are required");
+      setMessage("❌ Name, roll number, and face capture are required.");
       return;
     }
 
@@ -29,7 +29,7 @@ const Enrollment = () => {
     });
 
     if (result.success) {
-      setMessage("✅ Student enrolled successfully");
+      setMessage("✅ Student enrolled successfully.");
       setStudents(getEnrolledStudents());
 
       setName("");
@@ -42,57 +42,88 @@ const Enrollment = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Student Enrollment</h2>
+      <h2>Enrollment (Teachers)</h2>
+      <p>
+        Use this page to enroll students for face recognition. Capture a clear
+        frontal photo and save.
+      </p>
 
-      <input
-        type="text"
-        placeholder="Student Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        style={{ display: "block", marginBottom: "10px" }}
-      />
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px" }}>
+        {/* LEFT: CAMERA + FORM */}
+        <div>
+          <h3>Camera</h3>
 
-      <input
-        type="text"
-        placeholder="Roll Number"
-        value={roll}
-        onChange={(e) => setRoll(e.target.value)}
-        style={{ display: "block", marginBottom: "10px" }}
-      />
+          {/* 🔑 REAL FACE CAPTURE */}
+          <EnrollmentFaceCapture
+            onDescriptorReady={setFaceDescriptor}
+          />
 
-      <EnrollmentFaceCapture
-        onDescriptorReady={setFaceDescriptor}
-      />
+          {faceDescriptor && (
+            <p style={{ color: "green" }}>
+              ✔ Face captured successfully
+            </p>
+          )}
 
-      {faceDescriptor && (
-        <p style={{ color: "green" }}>
-          ✔ Face captured successfully
-        </p>
-      )}
+          <div style={{ marginTop: "12px" }}>
+            <input
+              type="text"
+              placeholder="Student name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={{ display: "block", marginBottom: "10px" }}
+            />
 
-      <button
-        onClick={handleEnroll}
-        style={{ marginTop: "12px" }}
-      >
-        Enroll Student
-      </button>
+            <input
+              type="text"
+              placeholder="Student ID / Roll number"
+              value={roll}
+              onChange={(e) => setRoll(e.target.value)}
+              style={{ display: "block", marginBottom: "10px" }}
+            />
 
-      {message && <p>{message}</p>}
+            <button onClick={handleSaveEnrollment}>
+              Save Enrollment
+            </button>
 
-      <hr />
+            {message && (
+              <p style={{ marginTop: "10px" }}>{message}</p>
+            )}
+          </div>
 
-      <h3>Enrolled Students</h3>
-      {students.length === 0 ? (
-        <p>No students enrolled yet.</p>
-      ) : (
-        <ul>
-          {students.map((s) => (
-            <li key={s.id}>
-              {s.name} ({s.roll})
-            </li>
-          ))}
-        </ul>
-      )}
+          <div style={{ marginTop: "20px" }}>
+            <h4>Notes</h4>
+            <ul>
+              <li>Capture frontal face with good lighting</li>
+              <li>Ensure only one face is visible</li>
+              <li>Descriptors are stored locally (demo)</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* RIGHT: ENROLLED STUDENTS */}
+        <div>
+          <h3>Enrolled students (demo)</h3>
+
+          {students.length === 0 ? (
+            <p>No enrolled descriptors found (local demo).</p>
+          ) : (
+            <ul>
+              {students.map((s) => (
+                <li key={s.id}>
+                  {s.name} ({s.roll})
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <button
+            style={{ marginTop: "10px" }}
+            onClick={() => window.location.href = "/teacher/dashboard"}
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
