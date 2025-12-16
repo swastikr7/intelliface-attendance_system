@@ -1,0 +1,103 @@
+/* src/styles/dashboard.css */
+
+.dashboard {
+  padding: 24px;
+  color: #eaeaf0;
+}
+
+/* Section spacing */
+.section {
+  margin-top: 24px;
+}
+
+/* Grid layouts */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Card */
+.card {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.card h4 {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* Stat numbers */
+.stat {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* Progress bar */
+.progress-container {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-bar {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+}
+
+/* Subject card */
+.subject {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.safe {
+  color: #4caf50;
+}
+.warning {
+  color: #ffc107;
+}
+.critical {
+  color: #f44336;
+}
+
+/* Badge list */
+.badges li {
+  margin-top: 6px;
+}
+
+/* Insights */
+.insights li {
+  margin-top: 6px;
+}
+
+/* Attendance button */
+.attendance-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #4caf50;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.attendance-btn:disabled {
+  background: #777;
+  cursor: not-allowed;
+}
