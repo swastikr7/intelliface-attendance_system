@@ -6,72 +6,78 @@ import { matchFace } from "../utils/faceMatcher";
 
 const FaceScanner = ({ onFaceDetected }) => {
   const videoRef = useRef(null);
+  const mountedRef = useRef(true); // 🔑 critical
+  const streamRef = useRef(null);
 
-  const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
-  const [scanned, setScanned] = useState(false); // 🔒 scan lock
+  const [scanned, setScanned] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    let stream;
+    mountedRef.current = true;
 
     const init = async () => {
       try {
         await loadFaceModels();
+        if (!mountedRef.current) return;
 
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (!mountedRef.current) return;
+
+        streamRef.current = stream;
+
+        if (!videoRef.current) return;
         videoRef.current.srcObject = stream;
 
         videoRef.current.onloadedmetadata = async () => {
+          if (!mountedRef.current || !videoRef.current) return;
+
           await videoRef.current.play();
 
-          // Force dimensions (critical for face-api)
           videoRef.current.width = 320;
           videoRef.current.height = 240;
 
-          setTimeout(() => {
-            setReady(true);
-            console.log(
-              "🎥 Video ready:",
-              videoRef.current.videoWidth,
-              videoRef.current.videoHeight
-            );
-          }, 300);
+          setReady(true);
+          console.log(
+            "🎥 Video ready:",
+            videoRef.current.videoWidth,
+            videoRef.current.videoHeight
+          );
         };
       } catch (err) {
-        console.error(err);
-        setError("Camera or model loading failed");
+        if (mountedRef.current) {
+          console.error(err);
+          setError("Camera or model loading failed");
+        }
       }
     };
 
     init();
 
     return () => {
-      if (stream) stream.getTracks().forEach((t) => t.stop());
+      mountedRef.current = false;
+
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
     };
   }, []);
 
   const scanFace = async () => {
-    if (scanned) return; // 🔒 prevent double execution
+    if (scanned || !mountedRef.current) return;
     setScanned(true);
     setError("");
 
-    if (!ready) {
-      setError("Camera not ready yet. Please wait.");
+    if (!ready || !videoRef.current) {
+      setError("Camera not ready yet.");
       setScanned(false);
       return;
     }
 
-    const video = videoRef.current;
-
-    console.log(
-      "🔍 Scanning with dimensions:",
-      video.videoWidth,
-      video.videoHeight
-    );
-
     const detections = await faceapi
       .detectAllFaces(
-        video,
+        videoRef.current,
         new faceapi.TinyFaceDetectorOptions({
           inputSize: 416,
           scoreThreshold: 0.5,
@@ -80,14 +86,16 @@ const FaceScanner = ({ onFaceDetected }) => {
       .withFaceLandmarks()
       .withFaceDescriptors();
 
+    if (!mountedRef.current) return;
+
     if (!detections || detections.length === 0) {
-      setError("No face detected. Ensure good lighting.");
+      setError("No face detected.");
       setScanned(false);
       return;
     }
 
     if (detections.length > 1) {
-      setError("Multiple faces detected. Only one face allowed.");
+      setError("Multiple faces detected.");
       setScanned(false);
       return;
     }
@@ -103,15 +111,15 @@ const FaceScanner = ({ onFaceDetected }) => {
     const matchedRoll = matchFace(liveDescriptor, enrolled);
 
     if (!matchedRoll) {
-      setError("Face not recognized. Attendance denied.");
+      setError("Face not recognized.");
       setScanned(false);
       return;
     }
 
-    console.log("✅ Face matched:", matchedRoll);
-
-    // SUCCESS → notify parent ONCE
-    onFaceDetected(true, matchedRoll);
+    if (mountedRef.current) {
+      console.log("✅ Face matched:", matchedRoll);
+      onFaceDetected(true, matchedRoll);
+    }
   };
 
   return (
@@ -121,18 +129,10 @@ const FaceScanner = ({ onFaceDetected }) => {
         autoPlay
         muted
         playsInline
-        style={{
-          width: "320px",
-          height: "240px",
-          borderRadius: "10px",
-          marginTop: "10px",
-        }}
+        style={{ width: 320, height: 240, borderRadius: 10 }}
       />
 
-      <button
-        onClick={scanFace}
-        style={{ marginTop: "10px" }}
-      >
+      <button onClick={scanFace} style={{ marginTop: 10 }}>
         Scan Face
       </button>
 
