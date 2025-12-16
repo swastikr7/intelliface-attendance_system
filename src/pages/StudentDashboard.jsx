@@ -37,40 +37,84 @@ const StudentDashboard = () => {
     setAttendanceMarked(true);
     setScanStarted(false);
     setFaceVerified(false);
+    setVerifiedRoll(null);
   };
 
   return (
     <div className="dashboard">
       <h2>Student Dashboard</h2>
 
-      <div className="card section">
-        {!attendanceMarked ? (
-          <>
-            {!scanStarted && (
-              <button
-                className="attendance-btn"
-                onClick={() => setScanStarted(true)}
-              >
-                Scan Face
-              </button>
-            )}
+      <div
+        className="card section"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "15px",
+        }}
+      >
+        {!attendanceMarked && !scanStarted && (
+          <button
+            style={{
+              padding: "12px 24px",
+              fontSize: "16px",
+              borderRadius: "8px",
+              background: "#2563eb",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => setScanStarted(true)}
+          >
+            Scan Face
+          </button>
+        )}
 
-            {scanStarted && (
-              <FaceScanner onVerified={handleVerified} />
-            )}
+        {scanStarted && (
+          <>
+            <FaceScanner onVerified={handleVerified} />
 
             {faceVerified && (
-              <button
-                className="attendance-btn"
-                style={{ marginTop: 10 }}
-                onClick={markAttendance}
-              >
-                Mark Attendance
-              </button>
+              <>
+                <div
+                  style={{
+                    color: "#16a34a",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                  }}
+                >
+                  ✅ Face verified successfully
+                </div>
+
+                <button
+                  style={{
+                    padding: "12px 28px",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    background: "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onClick={markAttendance}
+                >
+                  Mark Attendance
+                </button>
+              </>
             )}
           </>
-        ) : (
-          <p className="safe">✔ Attendance marked for today</p>
+        )}
+
+        {attendanceMarked && (
+          <div
+            style={{
+              color: "#16a34a",
+              fontWeight: "bold",
+              fontSize: "16px",
+            }}
+          >
+            ✔ Attendance marked for today
+          </div>
         )}
       </div>
     </div>
