@@ -16,17 +16,12 @@ const StudentDashboard = () => {
     );
   }, []);
 
-  /**
-   * FINAL, SAFE attendance handler
-   * No analytics recomputation here
-   */
   const handleFaceDetected = (success, matchedRoll) => {
     if (!success || !matchedRoll) return;
 
-    // 1️⃣ Stop scanner immediately
+    // 🔑 UNMOUNT FIRST
     setScanStarted(false);
 
-    // 2️⃣ Save attendance
     addAttendance({
       name: student.name,
       roll: matchedRoll,
@@ -35,10 +30,7 @@ const StudentDashboard = () => {
       status: "Present",
     });
 
-    // 3️⃣ Hard refresh dashboard state (SAFE & STABLE)
-    setTimeout(() => {
-      window.location.reload();
-    }, 300);
+    setAttendanceMarked(true);
   };
 
   return (
