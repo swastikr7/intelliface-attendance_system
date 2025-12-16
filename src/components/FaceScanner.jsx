@@ -6,8 +6,10 @@ import { matchFace } from "../utils/faceMatcher";
 
 const FaceScanner = ({ onFaceDetected }) => {
   const videoRef = useRef(null);
+
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
+  const [scanned, setScanned] = useState(false); // 🔒 scan lock
 
   useEffect(() => {
     let stream;
@@ -22,11 +24,10 @@ const FaceScanner = ({ onFaceDetected }) => {
         videoRef.current.onloadedmetadata = async () => {
           await videoRef.current.play();
 
-          // 🔑 FORCE dimensions (CRITICAL)
+          // Force dimensions (critical for face-api)
           videoRef.current.width = 320;
           videoRef.current.height = 240;
 
-          // wait one frame
           setTimeout(() => {
             setReady(true);
             console.log(
@@ -50,10 +51,13 @@ const FaceScanner = ({ onFaceDetected }) => {
   }, []);
 
   const scanFace = async () => {
+    if (scanned) return; // 🔒 prevent double execution
+    setScanned(true);
     setError("");
 
     if (!ready) {
       setError("Camera not ready yet. Please wait.");
+      setScanned(false);
       return;
     }
 
@@ -65,7 +69,6 @@ const FaceScanner = ({ onFaceDetected }) => {
       video.videoHeight
     );
 
-    // ✅ SAFER: detectAllFaces
     const detections = await faceapi
       .detectAllFaces(
         video,
@@ -78,31 +81,36 @@ const FaceScanner = ({ onFaceDetected }) => {
       .withFaceDescriptors();
 
     if (!detections || detections.length === 0) {
-      setError("No face detected. Improve lighting and face visibility.");
+      setError("No face detected. Ensure good lighting.");
+      setScanned(false);
       return;
     }
 
     if (detections.length > 1) {
       setError("Multiple faces detected. Only one face allowed.");
+      setScanned(false);
       return;
     }
-
-    const liveDescriptor = Array.from(detections[0].descriptor);
 
     const enrolled = getEnrolledStudents();
     if (enrolled.length === 0) {
       setError("No enrolled students found.");
+      setScanned(false);
       return;
     }
 
+    const liveDescriptor = Array.from(detections[0].descriptor);
     const matchedRoll = matchFace(liveDescriptor, enrolled);
 
     if (!matchedRoll) {
       setError("Face not recognized. Attendance denied.");
+      setScanned(false);
       return;
     }
 
     console.log("✅ Face matched:", matchedRoll);
+
+    // SUCCESS → notify parent ONCE
     onFaceDetected(true, matchedRoll);
   };
 
@@ -121,7 +129,10 @@ const FaceScanner = ({ onFaceDetected }) => {
         }}
       />
 
-      <button onClick={scanFace} style={{ marginTop: "10px" }}>
+      <button
+        onClick={scanFace}
+        style={{ marginTop: "10px" }}
+      >
         Scan Face
       </button>
 
