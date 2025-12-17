@@ -15,7 +15,7 @@ import Enrollment from "./pages/Enrollment";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-function App() {
+export default function App() {
   const auth = useAuth();
   const user = auth?.user;
 
@@ -28,7 +28,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* ===== Protected Routes ===== */}
+      {/* ===== Dashboards ===== */}
       <Route
         path="/dashboard"
         element={
@@ -42,6 +42,7 @@ function App() {
         }
       />
 
+      {/* ===== Student Portal ===== */}
       <Route
         path="/student-portal"
         element={
@@ -51,6 +52,7 @@ function App() {
         }
       />
 
+      {/* ===== Teacher Enrollment ===== */}
       <Route
         path="/enrollment"
         element={
@@ -65,5 +67,3 @@ function App() {
     </Routes>
   );
 }
-
-export default App;
