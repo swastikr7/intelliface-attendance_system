@@ -1,33 +1,53 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const navigate = useNavigate();
+
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/70 backdrop-blur-xl">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-semibold text-lg">
+        <button
+          onClick={() => scrollTo("top")}
+          className="flex items-center gap-2 font-semibold text-lg"
+        >
           <span className="text-primary">⦿</span>
           IntelliFace
-        </Link>
+        </button>
 
         {/* Nav links */}
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#features" className="hover:text-foreground transition-colors">
+          <button
+            onClick={() => scrollTo("features")}
+            className="hover:text-foreground transition-colors"
+          >
             Features
-          </a>
-          <a href="#how-it-works" className="hover:text-foreground transition-colors">
+          </button>
+
+          <button
+            onClick={() => scrollTo("how-it-works")}
+            className="hover:text-foreground transition-colors"
+          >
             How it Works
-          </a>
-          <a href="#about" className="hover:text-foreground transition-colors">
+          </button>
+
+          <button
+            onClick={() => scrollTo("about")}
+            className="hover:text-foreground transition-colors"
+          >
             About
-          </a>
+          </button>
         </nav>
 
         {/* CTA */}
         <div className="flex items-center gap-3">
-          {/* Login */}
           <button
             onClick={() => navigate("/login")}
             className="hidden sm:inline-flex items-center justify-center rounded-lg
@@ -38,7 +58,6 @@ export default function Navbar() {
             Login
           </button>
 
-          {/* Get Started */}
           <button
             onClick={() => navigate("/signup")}
             className="inline-flex items-center justify-center rounded-lg
