@@ -1,69 +1,35 @@
-// src/App.jsx
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-/* Pages */
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+
+// Dashboards
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
-import StudentPortal from "./pages/StudentPortal";
-import Enrollment from "./pages/Enrollment";
-
-/* Auth */
-import { useAuth } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
-  const auth = useAuth();
-  const user = auth?.user;
-
   return (
-    <Routes>
-      {/* ===== Landing Page ===== */}
-      <Route path="/" element={<Landing />} />
+    <BrowserRouter>
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
-      {/* ===== Auth Pages ===== */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+        {/* Dashboards */}
+        <Route
+          path="/student/dashboard"
+          element={<StudentDashboard />}
+        />
+        <Route
+          path="/teacher/dashboard"
+          element={<TeacherDashboard />}
+        />
 
-      {/* ===== Dashboards ===== */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            {user?.role === "teacher" ? (
-              <TeacherDashboard />
-            ) : (
-              <StudentDashboard />
-            )}
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ===== Student Portal ===== */}
-      <Route
-        path="/student-portal"
-        element={
-          <ProtectedRoute>
-            <StudentPortal />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ===== Teacher Enrollment ===== */}
-      <Route
-        path="/enrollment"
-        element={
-          <ProtectedRoute>
-            <Enrollment />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ===== Fallback ===== */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<Landing />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
