@@ -1,68 +1,53 @@
-import { Scan, Shield, BarChart3, Clock, Users, Zap } from "lucide-react";
+import { Camera, ShieldCheck, Zap, BarChart3 } from "lucide-react";
 
 const features = [
   {
-    icon: Scan,
+    icon: Camera,
     title: "Face Recognition",
-    description: "Advanced AI-powered facial recognition for instant, contactless check-ins with 99.9% accuracy.",
+    desc: "Real-time AI based face detection ensures accurate attendance every time.",
   },
   {
-    icon: Clock,
-    title: "Real-time Tracking",
-    description: "Live attendance updates as students enter. No manual roll calls, no delays.",
-  },
-  {
-    icon: BarChart3,
-    title: "Smart Analytics",
-    description: "Comprehensive dashboards with attendance trends, patterns, and engagement insights.",
-  },
-  {
-    icon: Shield,
-    title: "Secure & Private",
-    description: "Enterprise-grade encryption. Face data is processed locally and never stored externally.",
-  },
-  {
-    icon: Users,
-    title: "Easy Enrollment",
-    description: "Simple one-time face registration process. Students are ready in seconds.",
+    icon: ShieldCheck,
+    title: "No Proxy",
+    desc: "Prevents fake attendance using unique facial verification.",
   },
   {
     icon: Zap,
-    title: "Instant Reports",
-    description: "Generate attendance reports, export data, and integrate with your existing systems.",
+    title: "Instant Check-in",
+    desc: "Attendance marked in seconds — no manual effort required.",
+  },
+  {
+    icon: BarChart3,
+    title: "Detailed Reports",
+    desc: "Generate and export attendance reports effortlessly.",
   },
 ];
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="py-24 relative">
+    <section id="features" className="py-28">
       <div className="container mx-auto px-6">
-        {/* Section header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="text-sm font-medium text-primary mb-4 block">Features</span>
+        <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Everything you need for modern attendance
+            Powerful Features
           </h2>
-          <p className="text-muted-foreground">
-            Designed for educators who want to spend less time on admin and more time teaching.
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Everything you need to manage attendance intelligently.
           </p>
         </div>
 
-        {/* Features grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+          {features.map((f, i) => (
             <div
-              key={feature.title}
-              className="group glass rounded-xl p-6 border-glow opacity-0 animate-fade-in"
-              style={{ animationDelay: `${0.1 * (index + 1)}s` }}
+              key={i}
+              className="group glass rounded-2xl p-6 border-glow
+                         transition-all duration-300
+                         hover:-translate-y-2
+                         hover:shadow-xl hover:shadow-primary/20"
             >
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <feature.icon className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {feature.description}
-              </p>
+              <f.icon className="w-7 h-7 text-primary mb-4 transition-transform group-hover:scale-110" />
+              <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
+              <p className="text-sm text-muted-foreground">{f.desc}</p>
             </div>
           ))}
         </div>
