@@ -20,7 +20,7 @@ export default function Login() {
 
       if (role === "teacher") {
         // ✅ MATCHES App.jsx
-        navigate("/teacher/dashboard");
+        navigate("/teacher/portal");
       } else {
         // ✅ MATCHES App.jsx
         navigate("/student/dashboard");
