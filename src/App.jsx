@@ -1,9 +1,11 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
+import StudentPortal from "./pages/StudentPortal";
+import Enrollment from "./pages/Enrollment";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 
@@ -15,13 +17,16 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* Dashboards */}
+      {/* Student */}
       <Route path="/student/portal" element={<StudentPortal />} />
-      <Route path="/teacher/enrollment" element={<Enrollment />} />
+      <Route path="/student/dashboard" element={<StudentDashboard />} />
 
-      {/* Fallback */}
-      <Route path="*" element={<Landing />} />
+      {/* Teacher */}
+      <Route path="/teacher/enrollment" element={<Enrollment />} />
+      <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+
+      {/* SAFE FALLBACK */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
-
