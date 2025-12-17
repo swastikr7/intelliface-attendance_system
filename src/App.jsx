@@ -16,7 +16,7 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
 
       {/* Dashboards */}
-      <Route path="/student/dashboard" element={<StudentDashboard />} />
+      <Route path="/student/portal" element={<StudentPortal />} />
       <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
 
       {/* Fallback */}
