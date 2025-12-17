@@ -79,3 +79,20 @@ body {
     );
 }
 
+/* Mobile tuning */
+@media (max-width: 640px) {
+  h1 {
+    line-height: 1.15;
+  }
+
+  section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  button {
+    font-size: 0.9rem;
+  }
+}
+
+
