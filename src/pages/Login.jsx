@@ -1,128 +1,101 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+// src/pages/Login.jsx
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
+  const auth = useAuth();
   const navigate = useNavigate();
 
   const [role, setRole] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  async function submit(e) {
     e.preventDefault();
-    setError("");
+    setErr("");
+    setLoading(true);
 
-    // 🔥 DEMO AUTH LOGIC
-    if (
-      role === "student" &&
-      email === "student@demo.com" &&
-      password === "student123"
-    ) {
-      navigate("/student/dashboard");
-      return;
+    try {
+      // Always force default credentials
+      const fixedEmail = role === "teacher" ? "teacher@demo.com" : "student@demo.com";
+      const fixedPassword = "123456";
+
+      const res = await auth.login({
+        email: fixedEmail,
+        password: fixedPassword
+      });
+
+      setLoading(false);
+
+      if (res.ok) {
+        if (auth.user?.role === "teacher") navigate("/dashboard");
+        else navigate("/classroom");
+      } else {
+        setErr("Invalid default credentials.");
+      }
+    } catch (error) {
+      console.error(error);
+      setErr("Login failed");
+      setLoading(false);
     }
-
-    if (
-      role === "teacher" &&
-      email === "teacher@demo.com" &&
-      password === "teacher123"
-    ) {
-      navigate("/teacher/dashboard");
-      return;
-    }
-
-    // ❌ Invalid
-    setError("Invalid demo credentials");
-  };
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-bg px-6">
-      <div className="glass w-full max-w-md rounded-2xl p-8 border-glow">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">IntelliFace</h1>
-          <p className="text-muted-foreground">Welcome back</p>
-        </div>
+    <section className="auth-float">
 
-        {/* Role Switch */}
-        <div className="flex gap-3 mb-6">
-          <button
+      <h1 className="brand-title-float">IntelliFace</h1>
+      <h2 className="auth-heading-float">Welcome back</h2>
+      <p className="auth-subtitle">Sign in to continue</p>
+
+      <form onSubmit={submit} className="auth-form-float">
+
+        {/* Role Selection */}
+        <div className="role-row-float">
+          <div
+            className={`pill-float ${role === "student" ? "active" : ""}`}
             onClick={() => setRole("student")}
-            className={`flex-1 rounded-lg px-4 py-2 text-sm transition-all
-              ${
-                role === "student"
-                  ? "bg-primary text-primary-foreground"
-                  : "border border-border text-muted-foreground"
-              }`}
           >
             Student
-          </button>
+          </div>
 
-          <button
+          <div
+            className={`pill-float ${role === "teacher" ? "active" : ""}`}
             onClick={() => setRole("teacher")}
-            className={`flex-1 rounded-lg px-4 py-2 text-sm transition-all
-              ${
-                role === "teacher"
-                  ? "bg-primary text-primary-foreground"
-                  : "border border-border text-muted-foreground"
-              }`}
           >
             Teacher
-          </button>
+          </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg bg-background/60 border border-border px-4 py-3 outline-none"
-            required
-          />
+        {/* Displaying default email only for clarity */}
+        <input
+          className="input-float"
+          placeholder="Email (auto-filled)"
+          value={role === "teacher" ? "teacher@demo.com" : "student@demo.com"}
+          disabled
+        />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg bg-background/60 border border-border px-4 py-3 outline-none"
-            required
-          />
+        <input
+          className="input-float"
+          type="password"
+          placeholder="Password (auto-filled)"
+          value="123456"
+          disabled
+        />
 
-          {error && (
-            <div className="text-sm text-red-500 text-center">
-              {error}
-            </div>
-          )}
+        {err && <div className="error-float">{err}</div>}
 
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500
-                       py-3 text-sm font-semibold text-white
-                       shadow-lg transition-all
-                       hover:scale-[1.04]"
-          >
-            Sign in
-          </button>
-        </form>
+        <button className="btn-float" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in"}
+        </button>
 
-        {/* Footer */}
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Don’t have an account?{" "}
-          <Link to="/signup" className="text-primary hover:underline">
-            Create account
-          </Link>
-        </p>
+        <Link to="/signup" className="link-float">
+          Create account
+        </Link>
 
-        {/* Demo hint */}
-        <div className="mt-6 text-xs text-muted-foreground text-center">
-          <p>Student → student@demo.com / student123</p>
-          <p>Teacher → teacher@demo.com / teacher123</p>
-        </div>
-      </div>
-    </div>
+      </form>
+    </section>
   );
 }
