@@ -2,85 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===============================
-   GLOBAL THEME (DARK)
-   =============================== */
+/* ---------------- Root Theme ---------------- */
+
 :root {
   --background: 222 47% 11%;
   --foreground: 210 40% 98%;
 
-  --card: 222 47% 14%;
+  --card: 222 47% 15%;
   --card-foreground: 210 40% 98%;
 
-  --popover: 222 47% 14%;
-  --popover-foreground: 210 40% 98%;
+  --border: 217 33% 20%;
+  --input: 217 33% 20%;
+  --ring: 217 91% 60%;
 
-  --primary: 190 95% 50%;
+  --primary: 217 91% 60%;
   --primary-foreground: 222 47% 11%;
 
-  --secondary: 215 27% 17%;
+  --secondary: 217 33% 20%;
   --secondary-foreground: 210 40% 98%;
 
-  --muted: 215 27% 17%;
+  --muted: 217 33% 20%;
   --muted-foreground: 215 20% 65%;
 
-  --accent: 190 95% 50%;
-  --accent-foreground: 222 47% 11%;
+  --accent: 217 33% 25%;
+  --accent-foreground: 210 40% 98%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 63% 31%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 215 27% 22%;
-  --input: 215 27% 22%;
-  --ring: 190 95% 50%;
-
   --radius: 0.75rem;
-}
 
-/* ===============================
-   BASE STYLES
-   =============================== */
-* {
-  border-color: hsl(var(--border));
+  --glass: 222 47% 18%;
+  --glow-primary: 217 91% 60%;
 }
 
 html,
-body {
+body,
+#root {
   height: 100%;
 }
 
 body {
-  margin: 0;
-  background: radial-gradient(
-      1200px circle at 80% 20%,
-      rgba(99, 102, 241, 0.18),
-      transparent 40%
-    ),
-    linear-gradient(
-      180deg,
-      hsl(222, 47%, 11%),
-      hsl(222, 47%, 8%)
-    );
-  color: hsl(var(--foreground));
+  @apply bg-background text-foreground antialiased;
   font-family: system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif;
+    "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans",
+    sans-serif;
 }
 
-/* ===============================
-   UTILITIES
-   =============================== */
+/* ---------------- Utility helpers ---------------- */
+
 .glass {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  @apply bg-card/70 backdrop-blur-xl border border-white/10;
 }
 
 .glow {
-  box-shadow: 0 0 40px rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 40px hsl(var(--glow-primary) / 0.25);
 }
 
-.text-gradient {
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.gradient-bg {
+  background: radial-gradient(
+      1200px 600px at top left,
+      hsl(217 91% 60% / 0.15),
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 500px at bottom right,
+      hsl(260 80% 65% / 0.15),
+      transparent 60%
+    ),
+    linear-gradient(
+      to bottom,
+      hsl(222 47% 11%),
+      hsl(222 47% 8%)
+    );
 }
