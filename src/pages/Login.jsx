@@ -1,15 +1,11 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
-  const auth = useAuth();
   const navigate = useNavigate();
 
   const [role, setRole] = useState("student");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,40 +14,25 @@ export default function Login() {
     setErr("");
     setLoading(true);
 
-    try {
-      // Always force default credentials
-      const fixedEmail = role === "teacher" ? "teacher@demo.com" : "student@demo.com";
-      const fixedPassword = "123456";
-
-      const res = await auth.login({
-        email: fixedEmail,
-        password: fixedPassword
-      });
-
+    // 🔥 DEMO LOGIN BYPASS (NO BACKEND)
+    setTimeout(() => {
       setLoading(false);
 
-      if (res.ok) {
-        if (auth.user?.role === "teacher") navigate("/dashboard");
-        else navigate("/classroom");
+      if (role === "teacher") {
+        navigate("/dashboard");      // teacher dashboard
       } else {
-        setErr("Invalid default credentials.");
+        navigate("/classroom");      // student portal / classroom
       }
-    } catch (error) {
-      console.error(error);
-      setErr("Login failed");
-      setLoading(false);
-    }
+    }, 500);
   }
 
   return (
     <section className="auth-float">
-
       <h1 className="brand-title-float">IntelliFace</h1>
       <h2 className="auth-heading-float">Welcome back</h2>
       <p className="auth-subtitle">Sign in to continue</p>
 
       <form onSubmit={submit} className="auth-form-float">
-
         {/* Role Selection */}
         <div className="role-row-float">
           <div
@@ -69,7 +50,7 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Displaying default email only for clarity */}
+        {/* Auto-filled demo credentials */}
         <input
           className="input-float"
           placeholder="Email (auto-filled)"
@@ -94,7 +75,6 @@ export default function Login() {
         <Link to="/signup" className="link-float">
           Create account
         </Link>
-
       </form>
     </section>
   );
