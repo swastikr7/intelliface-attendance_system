@@ -5,6 +5,7 @@ import FeaturesSection from "../components/landing/FeaturesSection";
 import HowItWorksSection from "../components/landing/HowItWorksSection";
 import CTASection from "../components/landing/CTASection";
 import Footer from "../components/landing/Footer";
+import AboutSection from "../components/landing/AboutSection";
 
 export default function Landing() {
   return (
