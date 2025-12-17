@@ -14,16 +14,18 @@ export default function Login() {
     setErr("");
     setLoading(true);
 
-    // 🔥 DEMO LOGIN BYPASS (NO BACKEND)
+    // 🔥 DEMO LOGIN BYPASS (NO BACKEND, NO UI CHANGE)
     setTimeout(() => {
       setLoading(false);
 
       if (role === "teacher") {
-        navigate("/dashboard");      // teacher dashboard
+        // ✅ MATCHES App.jsx
+        navigate("/teacher/dashboard");
       } else {
-        navigate("/classroom");      // student portal / classroom
+        // ✅ MATCHES App.jsx
+        navigate("/student/dashboard");
       }
-    }, 500);
+    }, 300);
   }
 
   return (
