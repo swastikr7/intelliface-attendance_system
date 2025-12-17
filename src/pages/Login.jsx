@@ -20,10 +20,10 @@ export default function Login() {
 
       if (role === "teacher") {
         // ✅ MATCHES App.jsx
-        navigate("/teacher/portal");
+        navigate("/teacher/enrollment");
       } else {
         // ✅ MATCHES App.jsx
-        navigate("/student/dashboard");
+        navigate("/student/portal");
       }
     }, 300);
   }
