@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Users, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -34,25 +33,32 @@ export default function HeroSection() {
             No proxies. No manual work. Just accuracy.
           </p>
 
-          {/* Buttons */}
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-            <Button
-              size="lg"
-              className="glow-primary group px-8"
+            {/* Primary */}
+            <button
               onClick={() => navigate("/signup")}
+              className="group inline-flex items-center justify-center rounded-xl
+                         bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground
+                         shadow-lg shadow-primary/30
+                         transition-all duration-300
+                         hover:scale-[1.05]
+                         hover:shadow-primary/60"
             >
               Get Started
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
+              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+            </button>
 
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-glow px-8 backdrop-blur-xl"
+            {/* Secondary */}
+            <button
               onClick={() => navigate("/login")}
+              className="inline-flex items-center justify-center rounded-xl
+                         border border-border bg-card/50 px-8 py-4 text-sm font-medium
+                         backdrop-blur-xl transition-all duration-300
+                         hover:bg-card hover:scale-[1.05]"
             >
               Login
-            </Button>
+            </button>
           </div>
 
           {/* Demo Card */}
@@ -93,6 +99,7 @@ export default function HeroSection() {
         </div>
       </div>
 
+      {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
