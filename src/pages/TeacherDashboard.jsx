@@ -1,47 +1,36 @@
-import React, { useEffect, useState } from "react";
-import { getAttendance } from "../utils/attendance";
+import { useNavigate } from "react-router-dom";
 
-const TeacherDashboard = () => {
-  const [attendance, setAttendance] = useState([]);
-
-  useEffect(() => {
-    setAttendance(getAttendance());
-  }, []);
+export default function TeacherDashboard() {
+  const navigate = useNavigate();
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Teacher Dashboard</h2>
+    <div className="min-h-screen bg-background text-foreground p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4">
+          Teacher Dashboard
+        </h1>
 
-      <h3>Attendance Records</h3>
+        <p className="text-muted-foreground mb-8">
+          Welcome! This is the teacher demo dashboard.
+        </p>
 
-      {attendance.length === 0 ? (
-        <p>No attendance records found.</p>
-      ) : (
-        <table border="1" cellPadding="6">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Roll</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {attendance.map((a) => (
-              <tr key={a.id}>
-                <td>{a.name}</td>
-                <td>{a.roll}</td>
-                <td>{a.date}</td>
-                <td>{a.time}</td>
-                <td>{a.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        <div className="glass rounded-2xl p-6 border-glow mb-6">
+          <h2 className="text-xl font-semibold mb-2">
+            Today’s Classes
+          </h2>
+          <p className="text-muted-foreground">
+            No class scheduled.
+          </p>
+        </div>
+
+        <button
+          onClick={() => navigate("/")}
+          className="rounded-lg bg-primary px-6 py-3 text-primary-foreground
+                     transition-all hover:scale-[1.05]"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
-};
-
-export default TeacherDashboard;
+}
