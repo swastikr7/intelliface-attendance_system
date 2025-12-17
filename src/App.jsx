@@ -17,7 +17,7 @@ export default function App() {
 
       {/* Dashboards */}
       <Route path="/student/portal" element={<StudentPortal />} />
-      <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+      <Route path="/teacher/enrollment" element={<Enrollment />} />
 
       {/* Fallback */}
       <Route path="*" element={<Landing />} />
