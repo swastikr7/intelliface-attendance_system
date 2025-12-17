@@ -1,36 +1,124 @@
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import FaceScanner from "../components/FaceScanner";
+import { addAttendance, getAttendance } from "../utils/attendance";
+import "../styles/dashboard.css";
 
-export default function StudentDashboard() {
-  const navigate = useNavigate();
+const StudentDashboard = () => {
+  const student = { name: "Demo Student" };
+
+  const [scanStarted, setScanStarted] = useState(false);
+  const [faceVerified, setFaceVerified] = useState(false);
+  const [verifiedRoll, setVerifiedRoll] = useState(null);
+  const [attendanceMarked, setAttendanceMarked] = useState(false);
+
+  useEffect(() => {
+    const today = new Date().toLocaleDateString();
+    setAttendanceMarked(
+      getAttendance().some((r) => r.date === today)
+    );
+  }, []);
+
+  const handleVerified = (roll) => {
+    setFaceVerified(true);
+    setVerifiedRoll(roll);
+  };
+
+  const markAttendance = () => {
+    if (!faceVerified || !verifiedRoll) return;
+
+    addAttendance({
+      name: student.name,
+      roll: verifiedRoll,
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
+      status: "Present",
+    });
+
+    setAttendanceMarked(true);
+    setScanStarted(false);
+    setFaceVerified(false);
+    setVerifiedRoll(null);
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">
-          Student Dashboard
-        </h1>
+    <div className="dashboard">
+      <h2>Student Dashboard</h2>
 
-        <p className="text-muted-foreground mb-8">
-          Welcome! This is the student demo dashboard.
-        </p>
+      <div
+        className="card section"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "15px",
+        }}
+      >
+        {!attendanceMarked && !scanStarted && (
+          <button
+            style={{
+              padding: "12px 24px",
+              fontSize: "16px",
+              borderRadius: "8px",
+              background: "#2563eb",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => setScanStarted(true)}
+          >
+            Scan Face
+          </button>
+        )}
 
-        <div className="glass rounded-2xl p-6 border-glow mb-6">
-          <h2 className="text-xl font-semibold mb-2">
-            Attendance Status
-          </h2>
-          <p className="text-muted-foreground">
-            No active class right now.
-          </p>
-        </div>
+        {scanStarted && (
+          <>
+            <FaceScanner onVerified={handleVerified} />
 
-        <button
-          onClick={() => navigate("/")}
-          className="rounded-lg bg-primary px-6 py-3 text-primary-foreground
-                     transition-all hover:scale-[1.05]"
-        >
-          Logout
-        </button>
+            {faceVerified && (
+              <>
+                <div
+                  style={{
+                    color: "#16a34a",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                  }}
+                >
+                  ✅ Face verified successfully
+                </div>
+
+                <button
+                  style={{
+                    padding: "12px 28px",
+                    fontSize: "16px",
+                    borderRadius: "8px",
+                    background: "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onClick={markAttendance}
+                >
+                  Mark Attendance
+                </button>
+              </>
+            )}
+          </>
+        )}
+
+        {attendanceMarked && (
+          <div
+            style={{
+              color: "#16a34a",
+              fontWeight: "bold",
+              fontSize: "16px",
+            }}
+          >
+            ✔ Attendance marked for today
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default StudentDashboard;
